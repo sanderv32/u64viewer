@@ -24,6 +24,12 @@ pub struct Args {
     /// Use alternate multicast address for audio
     #[arg(short, long, value_parser = parse_maddr, default_value = "239.0.1.65")]
     pub audio_maddr: Ipv4Addr,
+    /// Use alternate port number for video
+    #[arg(long, default_value_t = 11_000)]
+    pub video_port: u16,
+    /// Use alternate port number for audio
+    #[arg(long, default_value_t = 11_001)]
+    pub audio_port: u16,
 }
 
 fn parse_dimensions(s: &str) -> Result<(usize, usize), String> {

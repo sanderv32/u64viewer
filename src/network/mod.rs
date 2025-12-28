@@ -7,21 +7,33 @@ use tokio_util::sync::CancellationToken;
 
 use crate::AudioBuffer;
 
+pub struct NetworkConfig {
+    pub video_maddr: Ipv4Addr,
+    pub audio_maddr: Ipv4Addr,
+    pub video_port: u16,
+    pub audio_port: u16,
+}
+
 pub async fn network_tasks(
+    config: NetworkConfig,
     video_tx: Sender<Vec<u8>>,
     audio_buffer: Option<AudioBuffer>,
 ) -> Result<(), String> {
-    let video_socket = UdpSocket::bind("0.0.0.0:11000").await
+    let video_maddr = config.video_maddr;
+    let audio_maddr = config.audio_maddr;
+    let video_port = config.video_port;
+    let audio_port = config.audio_port;
+    let video_socket = UdpSocket::bind(format!("0.0.0.0:{video_port}")).await
         .map_err(|e| e.to_string())?;
-    video_socket.join_multicast_v4(Ipv4Addr::new(239, 0, 1, 64), Ipv4Addr::UNSPECIFIED)
+    video_socket.join_multicast_v4(video_maddr, Ipv4Addr::UNSPECIFIED)
         .map_err(|e| e.to_string())?;
     let video_task =
         tokio::spawn(async move { protocol::handle_video(video_socket, video_tx).await });
 
     let audio_task = if let Some(audio_buffer) = audio_buffer {
-        let audio_socket = UdpSocket::bind("0.0.0.0:11001").await
+        let audio_socket = UdpSocket::bind(format!("0.0.0.0:{audio_port}")).await
             .map_err(|e| e.to_string())?;
-        audio_socket.join_multicast_v4(Ipv4Addr::new(239, 0, 1, 65), Ipv4Addr::UNSPECIFIED)
+        audio_socket.join_multicast_v4(audio_maddr, Ipv4Addr::UNSPECIFIED)
             .map_err(|e| e.to_string())?;
         tokio::spawn(async move { protocol::handle_audio(audio_socket, audio_buffer).await })
     } else {

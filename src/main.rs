@@ -12,9 +12,7 @@ mod constants;
 mod network;
 mod video;
 use crate::{
-    args::Args,
-    audio::{AudioBuffer, AudioRingBuffer},
-    video::Window,
+    args::Args, audio::{AudioBuffer, AudioRingBuffer}, network::NetworkConfig, video::Window
 };
 
 static CANCEL_TOKEN: LazyLock<CancellationToken> = LazyLock::new(CancellationToken::new);
@@ -51,10 +49,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (video_tx, mut video_rx) = mpsc::channel::<Vec<u8>>(20);
 
     // Spawn concurrent tasks
+    let network_config = NetworkConfig {
+        video_maddr: args.video_maddr,
+        audio_maddr: args.audio_maddr,
+        video_port: args.video_port,
+        audio_port: args.audio_port,
+    };
     thread::spawn(move || {
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
-            network::network_tasks(video_tx, audio_buffer)
+            network::network_tasks(network_config, video_tx, audio_buffer)
                 .await.unwrap();
         });
     });

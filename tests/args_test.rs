@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use clap::Parser;
+    use std::net::Ipv4Addr;
     use lib::args::Args;
 
     #[test]
@@ -9,6 +10,10 @@ mod tests {
         assert_eq!(args.dimensions, (384, 272));
         assert_eq!(args.mute, false);
         assert!(args.palette.is_empty());
+        assert_eq!(args.video_maddr, Ipv4Addr::new(239, 0, 1, 64));
+        assert_eq!(args.audio_maddr, Ipv4Addr::new(239, 0, 1, 65));
+        assert_eq!(args.video_port, 11_000);
+        assert_eq!(args.audio_port, 11_001);
     }
 
     #[test]
@@ -62,17 +67,71 @@ mod tests {
     }
 
     #[test]
+    fn test_custom_video_multicast_address() {
+        let args = Args::try_parse_from(&["program", "-v", "239.1.2.3"]).unwrap();
+        assert_eq!(args.video_maddr, Ipv4Addr::new(239, 1, 2, 3));
+    }
+
+    #[test]
+    fn test_custom_audio_multicast_address() {
+        let args = Args::try_parse_from(&["program", "-a", "239.5.6.7"]).unwrap();
+        assert_eq!(args.audio_maddr, Ipv4Addr::new(239, 5, 6, 7));
+    }
+
+    #[test]
+    fn test_custom_video_port() {
+        let args = Args::try_parse_from(&["program", "--video-port", "12000"]).unwrap();
+        assert_eq!(args.video_port, 12000);
+    }
+
+    #[test]
+    fn test_custom_audio_port() {
+        let args = Args::try_parse_from(&["program", "--audio-port", "12001"]).unwrap();
+        assert_eq!(args.audio_port, 12001);
+    }
+
+    #[test]
+    fn test_invalid_multicast_address_not_multicast() {
+        let result = Args::try_parse_from(&["program", "-v", "192.168.1.1"]);
+        assert!(result.is_err());
+        let err = result.unwrap_err().to_string();
+        assert!(err.contains("not a multicast address"));
+    }
+
+    #[test]
+    fn test_invalid_multicast_address_format() {
+        let result = Args::try_parse_from(&["program", "-v", "999.999.999.999"]);
+        assert!(result.is_err());
+        let err = result.unwrap_err().to_string();
+        assert!(err.contains("parsing multicast address"));
+    }
+
+    #[test]
+    fn test_invalid_multicast_address_malformed() {
+        let result = Args::try_parse_from(&["program", "-a", "not.an.ip.address"]);
+        assert!(result.is_err());
+    }
+
+    #[test]
     fn test_all_flags_combined() {
         let args = Args::try_parse_from(&[
             "program",
             "-d", "800x600",
             "-m",
-            "-p", "FF0000,00FF00,0000FF,FFFF00,FF00FF,00FFFF,FFFFFF,000000,808080,800000,008000,000080,808000,800080,008080,C0C0C0"
+            "-p", "FF0000,00FF00,0000FF,FFFF00,FF00FF,00FFFF,FFFFFF,000000,808080,800000,008000,000080,808000,800080,008080,C0C0C0",
+            "-v", "239.10.20.30",
+            "-a", "239.10.20.31",
+            "--video-port", "15000",
+            "--audio-port", "15001"
         ]).unwrap();
 
         assert_eq!(args.dimensions, (800, 600));
         assert_eq!(args.mute, true);
         assert_eq!(args.palette.len(), 16);
+        assert_eq!(args.video_maddr, Ipv4Addr::new(239, 10, 20, 30));
+        assert_eq!(args.audio_maddr, Ipv4Addr::new(239, 10, 20, 31));
+        assert_eq!(args.video_port, 15000);
+        assert_eq!(args.audio_port, 15001);
     }
 
     #[test]
@@ -117,8 +176,7 @@ mod tests {
     fn test_palette_invalid_hex() {
         let result = Args::try_parse_from(&[
             "program",
-            "-p",
-            "GGGGGG,00FF00,0000FF,FFFF00,FF00FF,00FFFF,FFFFFF,000000,808080,800000,008000,000080,808000,800080,008080,C0C0C0",
+            "-p", "GGGGGG,00FF00,0000FF,FFFF00,FF00FF,00FFFF,FFFFFF,000000,808080,800000,008000,000080,808000,800080,008080,C0C0C0"
         ]);
         assert!(result.is_err());
         let err = result.unwrap_err().to_string();
@@ -168,5 +226,44 @@ mod tests {
     fn test_maximum_valid_dimensions() {
         let args = Args::try_parse_from(&["program", "-d", "5120x3650"]).unwrap();
         assert_eq!(args.dimensions, (5120, 3650));
+    }
+
+    #[test]
+    fn test_valid_multicast_ranges() {
+        // Test various valid multicast addresses (224.0.0.0 to 239.255.255.255)
+        let args1 = Args::try_parse_from(&["program", "-v", "224.0.0.1"]).unwrap();
+        assert_eq!(args1.video_maddr, Ipv4Addr::new(224, 0, 0, 1));
+
+        let args2 = Args::try_parse_from(&["program", "-v", "239.255.255.255"]).unwrap();
+        assert_eq!(args2.video_maddr, Ipv4Addr::new(239, 255, 255, 255));
+    }
+
+    #[test]
+    fn test_port_boundaries() {
+        // Test minimum port
+        let args1 = Args::try_parse_from(&["program", "--video-port", "1"]).unwrap();
+        assert_eq!(args1.video_port, 1);
+
+        // Test maximum port
+        let args2 = Args::try_parse_from(&["program", "--audio-port", "65535"]).unwrap();
+        assert_eq!(args2.audio_port, 65535);
+    }
+
+    #[test]
+    fn test_invalid_port_too_large() {
+        let result = Args::try_parse_from(&["program", "--video-port", "70000"]);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_long_form_multicast_addresses() {
+        let args = Args::try_parse_from(&[
+            "program",
+            "--video-maddr", "239.100.100.100",
+            "--audio-maddr", "239.200.200.200"
+        ]).unwrap();
+
+        assert_eq!(args.video_maddr, Ipv4Addr::new(239, 100, 100, 100));
+        assert_eq!(args.audio_maddr, Ipv4Addr::new(239, 200, 200, 200));
     }
 }
