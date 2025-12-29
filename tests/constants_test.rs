@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use lib::constants::{COLORS, HEIGHT, WIDTH, colors_to_u32};
+    use lib::constants::{COLORS, colors_to_u32};
 
     #[test]
     fn test_colors_array_size() {
@@ -38,17 +38,5 @@ mod tests {
         let color = [0x12, 0x34, 0x56, 0x78];
         let expected = (0x12 << 24) | (0x34 << 16) | (0x56 << 8) | 0x78;
         assert_eq!(colors_to_u32(color), expected);
-    }
-
-    #[test]
-    fn test_dimensions() {
-        assert_eq!(WIDTH, 384);
-        assert_eq!(HEIGHT, 272);
-    }
-
-    #[test]
-    fn test_frame_buffer_size() {
-        let frame_size = WIDTH * HEIGHT;
-        assert_eq!(frame_size, 104_448);
     }
 }

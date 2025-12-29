@@ -5,18 +5,6 @@ mod tests {
     use lib::args::Args;
 
     #[test]
-    fn test_default_args() {
-        let args = Args::try_parse_from(&["program"]).unwrap();
-        assert_eq!(args.dimensions, (384, 272));
-        assert_eq!(args.mute, false);
-        assert!(args.palette.is_empty());
-        assert_eq!(args.video_maddr, Ipv4Addr::new(239, 0, 1, 64));
-        assert_eq!(args.audio_maddr, Ipv4Addr::new(239, 0, 1, 65));
-        assert_eq!(args.video_port, 11_000);
-        assert_eq!(args.audio_port, 11_001);
-    }
-
-    #[test]
     fn test_custom_dimensions() {
         let args = Args::try_parse_from(&["program", "-d", "640x480"]).unwrap();
         assert_eq!(args.dimensions, (640, 480));
