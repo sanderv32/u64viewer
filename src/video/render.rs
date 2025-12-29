@@ -11,7 +11,7 @@ pub struct Window {
 pub fn run_window(
     window: &Window,
     palette: Option<&Vec<u32>>,
-    video_rx: &mut Receiver<Vec<u8>>
+    video_rx: &mut Receiver<Vec<u8>>,
 ) -> Result<(), String> {
     let mut window = minifb::Window::new(
         "U64 Viewer - ESC to exit",
@@ -22,7 +22,8 @@ pub fn run_window(
             scale_mode: minifb::ScaleMode::AspectRatioStretch,
             ..Default::default()
         },
-    ).map_err(|e| format!("ERROR: {e}"))?;
+    )
+    .map_err(|e| format!("ERROR: {e}"))?;
 
     let mut frame = vec![0u32; WIDTH * HEIGHT].into_boxed_slice();
     let colors: [[u8; 4]; 16] = if let Some(palette) = palette

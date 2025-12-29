@@ -92,7 +92,8 @@ pub async fn handle_audio(socket: UdpSocket, audio_buffer: AudioBuffer) -> io::R
                 );
             }
 
-            let mut buffer = audio_buffer.lock()
+            let mut buffer = audio_buffer
+                .lock()
                 .expect("Unable to aquire lock on audio_buffer");
             for _ in 0..384 {
                 buffer.push(0.);
@@ -100,7 +101,8 @@ pub async fn handle_audio(socket: UdpSocket, audio_buffer: AudioBuffer) -> io::R
         }
         previous_seq = Some(audio_stream.seq);
 
-        let mut buffer = audio_buffer.lock()
+        let mut buffer = audio_buffer
+            .lock()
             .expect("Unable to aquire lock on audio_buffer");
 
         for sample_pair in &audio_stream.data {

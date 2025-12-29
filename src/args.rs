@@ -8,6 +8,7 @@ use std::{net::Ipv4Addr, str::FromStr};
 /// video frames (384x272 pixels) and plays back the accompanying stereo audio at 48kHz,
 /// allowing you to watch and hear the C64's output on your computer screen.
 #[derive(Debug, Parser)]
+#[command(version)]
 pub struct Args {
     /// Window dimension (e.g. 320x200, 640x480)
     #[arg(short, long, value_parser = parse_dimensions, default_value = "384x272")]
@@ -72,4 +73,3 @@ fn parse_maddr(addr: &str) -> Result<Ipv4Addr, String> {
     }
     Ok(addr)
 }
-

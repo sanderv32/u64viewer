@@ -27,7 +27,8 @@ pub fn init_audio(audio_buffer: AudioBuffer) -> Result<Stream, String> {
     let stream = match device.build_output_stream(
         &desired_config,
         move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
-            let mut buffer = audio_buffer.lock()
+            let mut buffer = audio_buffer
+                .lock()
                 .expect("Unable to aquire lock on audio_buffer");
             for sample in data.iter_mut() {
                 *sample = buffer.pop();
@@ -48,8 +49,8 @@ pub fn init_audio(audio_buffer: AudioBuffer) -> Result<Stream, String> {
                 .build_output_stream(
                     &fallback_config,
                     move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
-                        let mut buffer = value.lock()
-                            .expect("Unable to aquire lock on audio_buffer");
+                        let mut buffer =
+                            value.lock().expect("Unable to aquire lock on audio_buffer");
                         for sample in data.iter_mut() {
                             *sample = buffer.pop();
                         }

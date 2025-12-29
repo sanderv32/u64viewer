@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod tests {
     use clap::Parser;
-    use std::net::Ipv4Addr;
     use lib::args::Args;
+    use std::net::Ipv4Addr;
 
     #[test]
     fn test_custom_dimensions() {
@@ -164,7 +164,8 @@ mod tests {
     fn test_palette_invalid_hex() {
         let result = Args::try_parse_from(&[
             "program",
-            "-p", "GGGGGG,00FF00,0000FF,FFFF00,FF00FF,00FFFF,FFFFFF,000000,808080,800000,008000,000080,808000,800080,008080,C0C0C0"
+            "-p",
+            "GGGGGG,00FF00,0000FF,FFFF00,FF00FF,00FFFF,FFFFFF,000000,808080,800000,008000,000080,808000,800080,008080,C0C0C0",
         ]);
         assert!(result.is_err());
         let err = result.unwrap_err().to_string();
@@ -247,9 +248,12 @@ mod tests {
     fn test_long_form_multicast_addresses() {
         let args = Args::try_parse_from(&[
             "program",
-            "--video-maddr", "239.100.100.100",
-            "--audio-maddr", "239.200.200.200"
-        ]).unwrap();
+            "--video-maddr",
+            "239.100.100.100",
+            "--audio-maddr",
+            "239.200.200.200",
+        ])
+        .unwrap();
 
         assert_eq!(args.video_maddr, Ipv4Addr::new(239, 100, 100, 100));
         assert_eq!(args.audio_maddr, Ipv4Addr::new(239, 200, 200, 200));

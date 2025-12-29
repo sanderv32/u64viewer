@@ -1,6 +1,7 @@
 [package]
 name = "u64viewer"
-version = "0.1.0"
+authors = ["Alexander <sanderv32@gmail.com>"]
+version = "0.1.0-git"
 edition = "2024"
 
 [lib]

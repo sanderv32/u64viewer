@@ -12,7 +12,10 @@ mod constants;
 mod network;
 mod video;
 use crate::{
-    args::Args, audio::{AudioBuffer, AudioRingBuffer}, network::NetworkConfig, video::Window
+    args::Args,
+    audio::{AudioBuffer, AudioRingBuffer},
+    network::NetworkConfig,
+    video::Window,
 };
 
 static CANCEL_TOKEN: LazyLock<CancellationToken> = LazyLock::new(CancellationToken::new);
@@ -59,7 +62,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
             network::network_tasks(network_config, video_tx, audio_buffer)
-                .await.unwrap();
+                .await
+                .unwrap();
         });
     });
 
