@@ -42,7 +42,7 @@ jobs:
           RELEASE_TAG: ${{ github.ref }}
         run: |
           cargo install cargo-edit
-          cargo set-version ${RELEASE_TAG##*/v}
+          cargo set-version ${GITHUB_REF_NAME}
 
       - name: Build
         run: cargo build --release --locked --target ${{ matrix.target }}
