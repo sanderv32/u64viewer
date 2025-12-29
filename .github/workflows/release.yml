@@ -1,0 +1,58 @@
+name: Upload binaries to release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  release:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            asset_name: u64viewer-linux_amd64
+            target: x86_64-unknown-linux-gnu
+          - os: ubuntu-latest
+            asset_name: u64viewer-linux_musl_amd64
+            target: x86_64-unknown-linux-musl
+          - os: macos-latest
+            asset_name: u64viewer-darwin_amd64
+            target: x86_64-apple-darwin
+          - os: macos-latest
+            asset_name: u64viewer-darwin_arm64
+            target: arm64-apple-darwin
+          - os: windows-latest
+            asset_name: u64viewer-windows_amd64
+            target: x86_64-pc-windows-msvc
+          - os: windows-latest
+            asset_name: u64viewer-windows_arm64
+            target: aarch64-pc-windows-msvc
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Set Cargo.toml version
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ github.ref }}
+        run: |
+          mv Cargo.toml Cargo.toml.orig
+          sed "s/version = \".*-git\"/version = \"${RELEASE_TAG##*\/v}\"/" Cargo.toml.orig >Cargo.toml
+          mv Cargo.lock Cargo.lock.orig
+          sed "s/version = \".*-git\"/version = \"${RELEASE_TAG##*\/v}\"/" Cargo.lock.orig >Cargo.lock
+
+      - name: Build
+        run: cargo build --release --locked --target ${{ matrix.target }}
+
+      - name: Upload
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+          file: target/${{ matrix.target }}/release/u64viewer
+          asset_name: ${{ matrix.asset_name }}
