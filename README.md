@@ -260,22 +260,6 @@ tests/
 └── args_test.rs               # CLI argument tests
 ```
 
-### Running tests
-```bash
-# Run all tests
-cargo test
-
-# Run specific test suite
-cargo test args_test
-cargo test audio_ringbuffer_test
-
-# Run with output
-cargo test -- --nocapture
-
-# Run with debug logging
-RUST_LOG=debug cargo test
-```
-
 ### Building with optimizations
 ```bash
 cargo build --release
