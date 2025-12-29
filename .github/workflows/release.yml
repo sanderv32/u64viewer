@@ -41,10 +41,8 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.ref }}
         run: |
-          mv Cargo.toml Cargo.toml.orig
-          sed -i "s|version = \".*-git\"|version = \"${RELEASE_TAG#refs/tags/v}\"|" Cargo.toml.orig >Cargo.toml
-          mv Cargo.lock Cargo.lock.orig
-          sed -i "s|version = \".*-git\"|version = \"${RELEASE_TAG#refs/tags/v}\"|" Cargo.lock.orig >Cargo.lock
+          cargo install cargo-edit
+          cargo set-version ${RELEASE_TAG##*/v}
 
       - name: Build
         run: cargo build --release --locked --target ${{ matrix.target }}
