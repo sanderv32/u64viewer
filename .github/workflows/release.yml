@@ -20,7 +20,7 @@ jobs:
             target: x86_64-apple-darwin
           - os: macos-latest
             asset_name: u64viewer-darwin_arm64
-            target: arm64-apple-darwin
+            target: aarch64-apple-darwin
           - os: windows-latest
             asset_name: u64viewer-windows_amd64
             target: x86_64-pc-windows-msvc
