@@ -39,6 +39,12 @@ jobs:
           toolchain: stable
           target: ${{ matrix.target }}
 
+      - if: matrix.os = 'ubuntu-latest'
+        name: Install linux dependencies
+        run: |
+          sudo apt update
+          sudo apt install libasound2-dev -y
+
       - name: Set Cargo.toml version
         shell: bash
         env:
