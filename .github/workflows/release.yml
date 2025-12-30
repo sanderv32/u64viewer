@@ -44,6 +44,7 @@ jobs:
         run: |
           VERSION=${GITHUB_REF_NAME#v}
           sed -i "s|version = \".*-git\"|version = \"${VERSION}\"|" Cargo.toml
+          sed -i "s|version = \".*-git\"|version = \"${VERSION}\"|" Cargo.lock
 
       - if: matrix.os == 'ubuntu-latest'
         name: Install linux dependencies
