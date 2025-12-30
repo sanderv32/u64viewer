@@ -39,19 +39,17 @@ jobs:
           toolchain: stable
           target: ${{ matrix.target }}
 
+      - name: Set Cargo.toml version
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          sed -i "s|version = \".*-git\"|version = \"${VERSION}\"|" Cargo.toml
+
       - if: matrix.os == 'ubuntu-latest'
         name: Install linux dependencies
         run: |
           sudo apt update
-          sudo apt install libasound2-dev -y
-
-      - name: Set Cargo.toml version
-        shell: bash
-        env:
-          RELEASE_TAG: ${{ github.ref }}
-        run: |
-          cargo install cargo-edit
-          cargo set-version ${GITHUB_REF_NAME}
+          sudo apt install libasound2-dev musl-tools -y
 
       - name: Build
         run: cargo build --release --locked --target ${{ matrix.target }}
