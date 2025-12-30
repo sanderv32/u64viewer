@@ -9,7 +9,7 @@ name = "lib"
 path = "src/lib.rs"
 
 [[bin]]
-name = "u64-viewer"
+name = "u64viewer"
 path = "src/main.rs"
 
 [lints.clippy]
