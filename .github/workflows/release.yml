@@ -71,5 +71,5 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
-          file: target/${{ matrix.target }}/release/u64viewer
-          asset_name: ${{ matrix.asset_name }}
+          file: target/${{ matrix.target }}/release/u64viewer${{ matrix.os == 'windows-latest' && '.exe' || '' }}
+          asset_name: ${{ matrix.asset_name }}${{ matrix.os == 'windows-latest' && '.exe' || '' }}
