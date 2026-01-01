@@ -12,9 +12,6 @@ jobs:
           - os: ubuntu-latest
             asset_name: u64viewer-linux_amd64
             target: x86_64-unknown-linux-gnu
-          - os: ubuntu-latest
-            asset_name: u64viewer-linux_musl_amd64
-            target: x86_64-unknown-linux-musl
           - os: macos-latest
             asset_name: u64viewer-darwin_amd64
             target: x86_64-apple-darwin
