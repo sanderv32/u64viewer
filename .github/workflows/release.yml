@@ -39,12 +39,23 @@ jobs:
           toolchain: stable
           target: ${{ matrix.target }}
 
-      - name: Set Cargo.toml version
+      - name: Set Cargo.toml version (Unix)
+        if: matrix.os != 'windows-latest'
         shell: bash
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          sed -i "s|version = \".*-git\"|version = \"${VERSION}\"|" Cargo.toml
+          mv Cargo.toml Cargo.toml.orig
+          sed "s|version = \".*-git\"|version = \"${VERSION}\"|" Cargo.toml.orig > Cargo.toml
           cargo update -p u64viewer --offline || cargo generate-lockfile
+
+      - name: Set Cargo.toml version (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME -replace '^v', ''
+          (Get-Content ./Cargo.toml) -replace 'version = ".*-git"', "version = ""$version""" | Set-Content Cargo.toml
+          cargo update -p u64viewer --offline
+          if ($LASTEXITCODE -ne 0) { cargo generate-lockfile }
 
       - if: matrix.os == 'ubuntu-latest'
         name: Install linux dependencies
