@@ -54,7 +54,7 @@ fn parse_dimensions(s: &str) -> Result<(usize, usize), String> {
     }
 
     if width > 5120 || height > 3650 {
-        return Err("Dimensions too large (min 5120x3650)".to_string());
+        return Err("Dimensions too large (max 5120x3650)".to_string());
     }
 
     Ok((width, height))
@@ -69,7 +69,7 @@ fn parse_maddr(addr: &str) -> Result<Ipv4Addr, String> {
     let addr: Ipv4Addr = Ipv4Addr::from_str(addr)
         .map_err(|_| format!("Error parsing multicast address : {addr}"))?;
     if !addr.is_multicast() {
-        return Err(format!("Addres {addr} is not a multicast address"));
+        return Err(format!("Address {addr} is not a multicast address"));
     }
     Ok(addr)
 }

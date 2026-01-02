@@ -1,5 +1,7 @@
-mod ringbuffer;
 mod stream;
+use crate::RingBuffer;
 
-pub use ringbuffer::AudioRingBuffer;
-pub use stream::{AudioBuffer, init_audio};
+pub use stream::init_audio;
+
+use std::sync::{Arc, Mutex};
+pub type AudioBuffer = Arc<Mutex<RingBuffer<f32>>>;

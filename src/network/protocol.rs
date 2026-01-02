@@ -4,7 +4,8 @@ use tokio::sync::mpsc;
 use tracing::debug;
 use zerocopy::{FromBytes, Immutable, KnownLayout};
 
-use crate::{AudioBuffer, CANCEL_TOKEN};
+use crate::AudioBuffer;
+use crate::CANCEL_TOKEN;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, FromBytes, Immutable, KnownLayout)]
@@ -27,6 +28,7 @@ pub struct AudioStream {
 }
 
 pub async fn handle_video(socket: UdpSocket, sender: mpsc::Sender<Vec<u8>>) -> io::Result<()> {
+    debug!("Starting video handler");
     let mut buf = vec![0u8; 780];
     let mut first_run = true;
 
@@ -39,8 +41,11 @@ pub async fn handle_video(socket: UdpSocket, sender: mpsc::Sender<Vec<u8>>) -> i
             let video_stream = match VideoStream::read_from_bytes(&buf) {
                 Ok(v) => v,
                 Err(e) => {
-                    debug!("Size error: {:?}", e);
-                    return Err(io::ErrorKind::Other.into());
+                    debug!("Failed to parse video stream: {e:?}");
+                    return Err(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        format!("Invalid video packet: {e:?}"),
+                    ));
                 }
             };
             if video_stream.line & 0x8000 != 0 {
@@ -65,6 +70,7 @@ pub async fn handle_video(socket: UdpSocket, sender: mpsc::Sender<Vec<u8>>) -> i
 }
 
 pub async fn handle_audio(socket: UdpSocket, audio_buffer: AudioBuffer) -> io::Result<()> {
+    debug!("Starting audio handler");
     let mut previous_seq: Option<u16> = None;
     let mut buf = vec![0u8; 770];
     while !CANCEL_TOKEN.is_cancelled() {
@@ -74,8 +80,11 @@ pub async fn handle_audio(socket: UdpSocket, audio_buffer: AudioBuffer) -> io::R
         let audio_stream = match AudioStream::read_from_bytes(&buf) {
             Ok(a) => a,
             Err(e) => {
-                debug!("Size error: {:?}", e);
-                return Err(io::ErrorKind::Other.into());
+                debug!("Failed to parse audio stream: {e:?}");
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    format!("Invalid audio packet: {e:?}"),
+                ));
             }
         };
 
@@ -83,18 +92,15 @@ pub async fn handle_audio(socket: UdpSocket, audio_buffer: AudioBuffer) -> io::R
         if let Some(prev) = previous_seq
             && audio_stream.seq != prev.wrapping_add(1)
         {
-            let seq = audio_stream.seq;
-            if let Some(prev_seq) = previous_seq {
-                debug!(
-                    "Dropped audio packet! Expected {}, got {}",
-                    prev_seq.wrapping_add(1),
-                    seq,
-                );
-            }
+            debug!(
+                "Dropped audio packet! Expected {}, got {}",
+                prev.wrapping_add(1),
+                audio_stream.seq,
+            );
 
             let mut buffer = audio_buffer
                 .lock()
-                .expect("Unable to aquire lock on audio_buffer");
+                .expect("Unable to acquire lock on audio_buffer");
             for _ in 0..384 {
                 buffer.push(0.);
             }
@@ -103,7 +109,7 @@ pub async fn handle_audio(socket: UdpSocket, audio_buffer: AudioBuffer) -> io::R
 
         let mut buffer = audio_buffer
             .lock()
-            .expect("Unable to aquire lock on audio_buffer");
+            .expect("Unable to acquire lock on audio_buffer");
 
         for sample_pair in &audio_stream.data {
             let left = f32::from(sample_pair[0]) / 32768.;

@@ -21,10 +21,5 @@ pub const COLORS: [[u8; 4]; 16] = [
 
 #[must_use]
 pub fn colors_to_u32(argb: [u8; 4]) -> u32 {
-    let mut value = 0u32;
-    value |= u32::from(argb[0]) << 24;
-    value |= u32::from(argb[1]) << 16;
-    value |= u32::from(argb[2]) << 8;
-    value |= u32::from(argb[3]);
-    value
+    u32::from_be_bytes(argb)
 }

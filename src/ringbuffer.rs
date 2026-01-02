@@ -1,13 +1,15 @@
-#![allow(dead_code)]
 use std::collections::VecDeque;
 
-pub struct AudioRingBuffer {
-    buffer: VecDeque<f32>,
+pub struct RingBuffer<T> {
+    buffer: VecDeque<T>,
     max_size: usize,
     min_fill: usize,
 }
 
-impl AudioRingBuffer {
+impl<T> RingBuffer<T>
+where
+    T: Default,
+{
     #[must_use]
     pub fn new(max_size: usize, min_fill: usize) -> Self {
         Self {
@@ -17,18 +19,18 @@ impl AudioRingBuffer {
         }
     }
 
-    pub fn push(&mut self, sample: f32) {
+    pub fn push(&mut self, sample: T) {
         if self.buffer.len() >= self.max_size {
             self.buffer.pop_front();
         }
         self.buffer.push_back(sample);
     }
 
-    pub fn pop(&mut self) -> f32 {
+    pub fn pop(&mut self) -> T {
         if self.buffer.len() >= self.min_fill {
-            self.buffer.pop_front().unwrap_or(0.0)
+            self.buffer.pop_front().unwrap_or_default()
         } else {
-            0.0
+            T::default()
         }
     }
 
@@ -39,6 +41,6 @@ impl AudioRingBuffer {
 
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        self.buffer.len() == 0
+        self.buffer.is_empty()
     }
 }
