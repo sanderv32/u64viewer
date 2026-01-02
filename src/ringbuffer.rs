@@ -8,7 +8,7 @@ pub struct RingBuffer<T> {
 
 impl<T> RingBuffer<T>
 where
-    T: Default
+    T: Default,
 {
     #[must_use]
     pub fn new(max_size: usize, min_fill: usize) -> Self {

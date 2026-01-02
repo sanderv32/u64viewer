@@ -44,7 +44,7 @@ pub async fn handle_video(socket: UdpSocket, sender: mpsc::Sender<Vec<u8>>) -> i
                     debug!("Failed to parse video stream: {e:?}");
                     return Err(io::Error::new(
                         io::ErrorKind::InvalidData,
-                        format!("Invalid video packet: {e:?}")
+                        format!("Invalid video packet: {e:?}"),
                     ));
                 }
             };
@@ -83,7 +83,7 @@ pub async fn handle_audio(socket: UdpSocket, audio_buffer: AudioBuffer) -> io::R
                 debug!("Failed to parse audio stream: {e:?}");
                 return Err(io::Error::new(
                     io::ErrorKind::InvalidData,
-                    format!("Invalid audio packet: {e:?}")
+                    format!("Invalid audio packet: {e:?}"),
                 ));
             }
         };

@@ -52,8 +52,7 @@ pub async fn network_tasks(
     };
 
     // Wait for both tasks
-    _ = tokio::try_join!(video_task, audio_task)
-      .map_err(|e| format!("Task join error: {e}"))?;
+    _ = tokio::try_join!(video_task, audio_task).map_err(|e| format!("Task join error: {e}"))?;
 
     Ok(())
 }

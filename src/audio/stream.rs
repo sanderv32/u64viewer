@@ -21,7 +21,9 @@ pub fn init_audio(audio_buffer: &AudioBuffer) -> Result<Stream, String> {
     let audio_callback = {
         let buffer = audio_buffer.clone();
         move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
-            let mut buf = buffer.lock().expect("Unable to acquire lock on audio_buffer");
+            let mut buf = buffer
+                .lock()
+                .expect("Unable to acquire lock on audio_buffer");
             for sample in data.iter_mut() {
                 *sample = buf.pop();
             }
