@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use std::collections::VecDeque;
 
 pub struct RingBuffer<T> {
@@ -42,6 +41,6 @@ where
 
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        self.buffer.len() == 0
+        self.buffer.is_empty()
     }
 }

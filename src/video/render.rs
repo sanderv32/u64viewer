@@ -13,14 +13,14 @@ pub struct Window {
 /// # Errors
 /// Returns an error if unable to open the window
 pub fn run_window(
-    window: &Window,
-    palette: Option<&Vec<u32>>,
+    win_config: &Window,
+    palette: Option<&[u32]>,
     video_rx: &mut Receiver<Vec<u8>>,
 ) -> Result<(), String> {
     let mut window = minifb::Window::new(
         "U64 Viewer - ESC to exit",
-        window.width,
-        window.height,
+        win_config.width,
+        win_config.height,
         WindowOptions {
             resize: true,
             scale_mode: minifb::ScaleMode::AspectRatioStretch,
