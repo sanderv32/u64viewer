@@ -8,6 +8,10 @@ pub struct Window {
     pub height: usize,
 }
 
+/// # Panics
+/// Panics if there are conversion errors
+/// # Errors
+/// Returns an error if unable to open the window
 pub fn run_window(
     window: &Window,
     palette: Option<&Vec<u32>>,

@@ -4,7 +4,8 @@ use tokio::sync::mpsc;
 use tracing::debug;
 use zerocopy::{FromBytes, Immutable, KnownLayout};
 
-use crate::{AudioBuffer, CANCEL_TOKEN};
+use crate::AudioBuffer;
+use crate::CANCEL_TOKEN;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, FromBytes, Immutable, KnownLayout)]

@@ -3,9 +3,9 @@ use cpal::{Stream, StreamConfig};
 use std::sync::{Arc, Mutex};
 use tracing::error;
 
-use super::AudioRingBuffer;
+use crate::RingBuffer;
 
-pub type AudioBuffer = Arc<Mutex<AudioRingBuffer>>;
+pub type AudioBuffer = Arc<Mutex<RingBuffer<f32>>>;
 
 /// # Panics
 /// Panics if no output device is found or if unable to aquire a `audio_buffer` lock

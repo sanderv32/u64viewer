@@ -14,10 +14,12 @@ pub struct NetworkConfig {
     pub audio_port: u16,
 }
 
+/// # Errors
+/// Returns an error if unable to bind to socket
 pub async fn network_tasks(
     config: NetworkConfig,
     video_tx: Sender<Vec<u8>>,
-    audio_buffer: Option<AudioBuffer>,
+    audio_buffer: Option<AudioBuffer>, // If muted `audio_buffer` is `None`
 ) -> Result<(), String> {
     let video_maddr = config.video_maddr;
     let audio_maddr = config.audio_maddr;
@@ -41,6 +43,7 @@ pub async fn network_tasks(
             .map_err(|e| e.to_string())?;
         tokio::spawn(async move { protocol::handle_audio(audio_socket, audio_buffer).await })
     } else {
+        // Audio is muted
         let token = CancellationToken::new();
         let token_clone = token.clone();
         tokio::spawn(async move {
